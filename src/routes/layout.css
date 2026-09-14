@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-ink: #0b1020;
+	--color-panel: #151c31;
+	--color-line: #2a3452;
+	--color-gold: #ffc233;
+	--color-sea: #4cc9f0;
+	--color-mist: #c7d0e6;
+}
+
+html,
+body {
+	height: 100%;
+	background: var(--color-ink);
+	color: white;
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		'Helvetica Neue',
+		Arial,
+		sans-serif;
+}
+
+code,
+pre,
+kbd {
+	font-family:
+		ui-monospace, 'JetBrains Mono', 'Fira Code', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+kbd {
+	display: inline-block;
+	padding: 0.05rem 0.45rem;
+	border: 1px solid var(--color-line);
+	border-bottom-width: 3px;
+	border-radius: 0.375rem;
+	background: var(--color-panel);
+	font-size: 0.85em;
+}
+
+/* Slide body text helpers */
+.prose-slide ul,
+.prose-slide ol {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding-left: 1.5rem;
+}
+.prose-slide ul {
+	list-style: disc;
+}
+.prose-slide ol {
+	list-style: decimal;
+}
+.prose-slide strong {
+	color: white;
+}
+.prose-slide a {
+	color: var(--color-sea);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+.prose-slide p code,
+.prose-slide li code,
+.prose-slide h2 code {
+	background: var(--color-panel);
+	color: var(--color-gold);
+	padding: 0.1em 0.4em;
+	border-radius: 0.35rem;
+	font-size: 0.9em;
+}
+.card {
+	background: var(--color-panel);
+	border: 1px solid var(--color-line);
+	border-radius: 1rem;
+	padding: 1rem 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+.card h3 {
+	color: white;
+	font-weight: 800;
+	font-size: 1.15rem;
+}
+.card p {
+	font-size: 1rem;
+}
+.tip {
+	border-left: 4px solid var(--color-sea);
+	background: color-mix(in srgb, var(--color-sea) 10%, transparent);
+	padding: 0.75rem 1rem;
+	border-radius: 0.5rem;
+	font-size: 1rem;
+}
