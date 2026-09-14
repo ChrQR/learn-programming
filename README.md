@@ -28,44 +28,40 @@ bun run dev -- --open
 ```
 
 Other scripts: `bun run check` (svelte-check), `bun run lint`, `bun run format`, `bun run build`.
-All routes are prerendered (`src/routes/+layout.ts`) with `adapter-static`, so `build/` is a plain
-static site.
+All routes are prerendered (`src/routes/+layout.ts`) and bundled by `adapter-node` into a
+self-contained SvelteKit server in `build/` (run locally with `node build`).
 
 ## Deploying
 
 Building and publishing is a [Dagger](https://dagger.io) module in `dagger/` (TypeScript). It
-prerenders the site with bun, packs it into an unprivileged nginx image listening on port **8080**
-(non-root, so it works on a cluster with a restricted security context), and pushes it to the Zot
-registry at `registry.rannes.dev`.
+builds the SvelteKit Node server with bun, packs it into a Bun image that serves the app on port
+**3000** as the non-root `bun` user, and pushes it to the Zot registry at `registry.rannes.dev`.
+The container holds only the app; it is exposed via a NodePort and a separate Caddy proxy routes
+traffic to it.
 
-Nothing runs on a local engine: the CLI is pointed at the Dagger engine pod in the cluster, and the
-registry credential is the existing Kubernetes secret `zot-push` (a Docker config JSON) in the
-`dagger` namespace. The one-liner that does all of that:
+Nothing runs on a local engine: point the CLI at the engine pod in the cluster first
+(`dagger-connect`). A Dagger secret can only be supplied from the CLI side, so the push key is
+passed as a flag. With `ZOT_API_KEY` exported in your shell:
 
 ```sh
-scripts/publish.sh                 # pushes :latest and :<git short sha>
-scripts/publish.sh --tags=v1.2     # override the tags
+dagger-connect
+dagger call publish --password=env://ZOT_API_KEY          # pushes :latest as christian@rannes.dev
+bun run deploy                                            # same, plus a :<git short sha> tag
 ```
 
-It finds the engine pod, sets `_EXPERIMENTAL_DAGGER_RUNNER_HOST` (the same thing the
-`dagger-connect` shell function does), reads the secret with `kubectl` through Dagger's `cmd://`
-secret provider, and calls `publish`. The credential goes from `kubectl` to the Dagger CLI to the
-engine as a secret; it is never printed or written to disk. The module unpacks the user name and
-password for the registry from the Docker config and uses them for the push.
-
-Other useful calls after `dagger-connect`:
+`env://` means the Dagger CLI reads the variable and hands it to the engine as a secret; it never
+appears in logs or in the image. `bun run deploy` (`scripts/publish.sh`) also finds the engine pod
+by itself, and falls back to the cluster's `zot-push` secret via `publish-with-docker-config` when
+`ZOT_API_KEY` is not set. Other useful calls:
 
 ```sh
 dagger functions                       # list what the module can do
 dagger call check                      # prettier + eslint + svelte-check
-dagger call serve up --ports=8080:8080 # preview the image (port-forwarded from the cluster)
-dagger call publish-with-credentials \
-  --username=<user> --password="op://Private/Zot push secret/credential"   # explicit creds
+dagger call serve up --ports=3000:3000 # preview the image (port-forwarded from the cluster)
 ```
 
-The nginx config lives in `docker/nginx.conf`. The image is fully static; the only runtime network
-dependency is Pyodide, which the browser loads from the jsDelivr CDN (see
-`src/lib/py/pyodide.worker.ts`), so the kids need internet but the server does not.
+The only runtime network dependency is Pyodide, which the browser loads from the jsDelivr CDN
+(see `src/lib/py/pyodide.worker.ts`), so the kids need internet but the server does not.
 
 ## Project layout
 
@@ -81,8 +77,7 @@ src/
     ├── project/         First-project deck
     └── lessons/         Lesson index + one folder per lesson
 dagger/src/index.ts      Dagger module: check, build, container, serve, publish
-scripts/publish.sh       Build on the cluster engine and push using the zot-push secret
-docker/nginx.conf        nginx config used inside the image
+scripts/publish.sh       `bun run deploy`: build on the cluster engine and push
 ```
 
 ### Writing a lesson

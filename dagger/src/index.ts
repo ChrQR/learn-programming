@@ -1,15 +1,17 @@
 /**
  * Build and publish the Learn Programming site.
  *
- * The site is prerendered to static files with bun, packed into an unprivileged
- * nginx image (port 8080), and pushed to the Zot registry at registry.rannes.dev.
+ * The site is built with bun into a self-contained SvelteKit Node server, packed
+ * into a Bun image that serves it on port 3000, and pushed to the Zot registry at
+ * registry.rannes.dev.
  *
- * Everything runs on the Dagger engine in the cluster (see scripts/publish.sh).
- * The registry credential is the Kubernetes secret `zot-push` (a Docker config
- * JSON) in the `dagger` namespace, handed to `publish` as a Dagger secret:
+ * Everything runs on the Dagger engine in the cluster (`dagger-connect` first).
+ * A Dagger secret can only come from the CLI side, so the push key is passed as
+ * a flag; with ZOT_API_KEY exported in your shell that is:
  *
- *   dagger call publish \
- *     --docker-config="cmd://kubectl get secret zot-push -n dagger -o jsonpath='{.data.\.dockerconfigjson}' | base64 -d"
+ *   dagger call publish --password=env://ZOT_API_KEY
+ *
+ * (or `bun run deploy`, which also tags the image with the git short sha).
  */
 import {
 	dag,
@@ -23,10 +25,11 @@ import {
 } from '@dagger.io/dagger';
 
 const BUN_IMAGE = 'oven/bun:1';
-const NGINX_IMAGE = 'nginxinc/nginx-unprivileged:alpine';
-const PORT = 8080;
+const RUNTIME_IMAGE = 'oven/bun:1-alpine';
+const PORT = 3000;
 const DEFAULT_REGISTRY = 'registry.rannes.dev';
 const DEFAULT_IMAGE = 'learn-programming';
+const DEFAULT_USERNAME = 'christian@rannes.dev';
 
 @object()
 export class LearnProgramming {
@@ -65,26 +68,30 @@ export class LearnProgramming {
 		return `${lint}\n${check}`;
 	}
 
-	/** Build the prerendered static site (the contents of build/). */
+	/** Build the SvelteKit Node server (the contents of build/: index.js + assets). */
 	@func()
 	build(): Directory {
 		return this.workspace().withExec(['bun', 'run', 'build']).directory('/app/build');
 	}
 
-	/** The runnable image: unprivileged nginx serving the static site on port 8080. */
+	/** The runnable image: the SvelteKit Node server on port 3000, as the non-root `bun` user. */
 	@func()
 	container(): Container {
 		return dag
 			.container()
-			.from(NGINX_IMAGE)
-			.withFile('/etc/nginx/conf.d/default.conf', this.source.file('docker/nginx.conf'))
-			.withDirectory('/usr/share/nginx/html', this.build())
-			.withExposedPort(PORT);
+			.from(RUNTIME_IMAGE)
+			.withDirectory('/app', this.build())
+			.withWorkdir('/app')
+			.withEnvVariable('PORT', String(PORT))
+			.withEnvVariable('HOST', '0.0.0.0')
+			.withUser('bun')
+			.withExposedPort(PORT)
+			.withEntrypoint(['bun', './index.js']);
 	}
 
 	/**
 	 * Serve the site for a preview (port-forwarded from the engine):
-	 *   dagger call serve up --ports=8080:8080
+	 *   dagger call serve up --ports=3000:3000
 	 */
 	@func()
 	serve(): Service {
@@ -92,51 +99,73 @@ export class LearnProgramming {
 	}
 
 	/**
-	 * Build the image and push it, authenticating with a Docker config JSON
-	 * (the same format as ~/.docker/config.json and kubernetes.io/dockerconfigjson secrets).
-	 * Returns the pushed references with their digests.
+	 * Build the image and push it. Returns the pushed references with their digests.
 	 *
-	 * @param dockerConfig The Docker config JSON as a secret, e.g. cmd://kubectl get secret zot-push -n dagger -o jsonpath='{.data.\.dockerconfigjson}' | base64 -d
-	 * @param registry Registry host; must have an entry in the Docker config.
+	 *   dagger call publish --password=env://ZOT_API_KEY
+	 *
+	 * @param password Registry password or API key, e.g. env://ZOT_API_KEY or op://Private/Zot push secret/credential
+	 * @param username Registry user name.
+	 * @param registry Registry host.
 	 * @param image Image name inside the registry.
 	 * @param tags Tags to push, e.g. --tags=latest,abc123
 	 */
 	@func()
 	async publish(
+		password: Secret,
+		username = DEFAULT_USERNAME,
+		registry = DEFAULT_REGISTRY,
+		image = DEFAULT_IMAGE,
+		tags: string[] = ['latest']
+	): Promise<string> {
+		return pushAll(
+			this.container().withRegistryAuth(registry, username, password),
+			registry,
+			image,
+			tags
+		);
+	}
+
+	/**
+	 * Same as publish, but authenticating with a Docker config JSON (the format of
+	 * ~/.docker/config.json and kubernetes.io/dockerconfigjson secrets), for example
+	 * the cluster's own `zot-push` secret:
+	 *
+	 *   dagger call publish-with-docker-config \
+	 *     --docker-config="cmd://kubectl get secret zot-push -n dagger -o jsonpath='{.data.\.dockerconfigjson}' | base64 -d"
+	 *
+	 * @param dockerConfig The Docker config JSON as a secret.
+	 * @param registry Registry host; must have an entry in the Docker config.
+	 * @param image Image name inside the registry.
+	 * @param tags Tags to push, e.g. --tags=latest,abc123
+	 */
+	@func()
+	async publishWithDockerConfig(
 		dockerConfig: Secret,
 		registry = DEFAULT_REGISTRY,
 		image = DEFAULT_IMAGE,
 		tags: string[] = ['latest']
 	): Promise<string> {
 		const { username, password } = await registryCredentials(dockerConfig, registry);
-		return this.publishWithCredentials(username, password, registry, image, tags);
+		return pushAll(
+			this.container().withRegistryAuth(registry, username, password),
+			registry,
+			image,
+			tags
+		);
 	}
+}
 
-	/**
-	 * Build the image and push it with an explicit user name and password.
-	 * Returns the pushed references with their digests.
-	 *
-	 * @param username Registry user name.
-	 * @param password Registry password or API key, e.g. op://Private/Zot push secret/credential
-	 * @param registry Registry host.
-	 * @param image Image name inside the registry.
-	 * @param tags Tags to push, e.g. --tags=latest,abc123
-	 */
-	@func()
-	async publishWithCredentials(
-		username: string,
-		password: Secret,
-		registry = DEFAULT_REGISTRY,
-		image = DEFAULT_IMAGE,
-		tags: string[] = ['latest']
-	): Promise<string> {
-		const container = this.container().withRegistryAuth(registry, username, password);
-		const refs: string[] = [];
-		for (const tag of tags) {
-			refs.push(await container.publish(`${registry}/${image}:${tag}`));
-		}
-		return refs.join('\n');
+async function pushAll(
+	container: Container,
+	registry: string,
+	image: string,
+	tags: string[]
+): Promise<string> {
+	const refs: string[] = [];
+	for (const tag of tags) {
+		refs.push(await container.publish(`${registry}/${image}:${tag}`));
 	}
+	return refs.join('\n');
 }
 
 /**

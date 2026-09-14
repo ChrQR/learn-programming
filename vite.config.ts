@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
-import adapter from '@sveltejs/adapter-static';
+import adapter from '@sveltejs/adapter-node';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
@@ -13,9 +13,9 @@ export default defineConfig({
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
 
-			// Every route is prerendered (see src/routes/+layout.ts), so the site is plain static
-			// files in build/, served by nginx in the Docker image.
-			adapter: adapter({ pages: 'build', assets: 'build', strict: true })
+			// The Node adapter builds a self-contained server (build/index.js) that serves the
+			// app on PORT (3000 in the image). Routes are still prerendered (src/routes/+layout.ts).
+			adapter: adapter()
 		})
 	]
 });
