@@ -49,10 +49,7 @@
 	>
 		{#snippet en()}
 			<ul>
-				<li>
-					A course for <strong>11 to 14 year olds</strong> who want to learn how to make computers do
-					what they say.
-				</li>
+				<li>A course for people to learn how to make computers do what they say.</li>
 				<li>
 					We start with <strong>Python</strong>: a friendly language that is also used by real
 					companies, scientists and game makers.
@@ -258,8 +255,8 @@
 			<p>Before we can write code, we need a few programs on your computer. We will install:</p>
 			<ol>
 				<li>A <strong>GitHub</strong> account, to save and share your code</li>
-				<li><strong>bun</strong>, and a copy of these lessons, so they run on your own computer</li>
-				<li><strong>bun</strong>, and a copy of these lessons, so they run on your own computer</li>
+
+				<li><strong>git</strong> and the <strong>GitHub CLI</strong>, to fetch and share code</li>
 				<li><strong>Zed</strong>, the editor we write code in</li>
 				<li><strong>uv</strong>, which installs Python and manages projects</li>
 				<li>
@@ -274,12 +271,8 @@
 			<p>Før vi kan skrive kode, skal vi have et par programmer på din computer. Vi installerer:</p>
 			<ol>
 				<li>En <strong>GitHub</strong>-konto, til at gemme og dele din kode</li>
-				<li>
-					<strong>bun</strong> og en kopi af disse lektioner, så de kører på din egen computer
-				</li>
-				<li>
-					<strong>bun</strong> og en kopi af disse lektioner, så de kører på din egen computer
-				</li>
+
+				<li><strong>git</strong> og <strong>GitHub CLI</strong>, til at hente og dele kode</li>
 				<li><strong>Zed</strong>, den editor vi skriver kode i</li>
 				<li><strong>uv</strong>, som installerer Python og styrer projekter</li>
 				<li>

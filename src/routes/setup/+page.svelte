@@ -4,16 +4,9 @@
 	import Code from '$lib/deck/Code.svelte';
 	import OsTabs from '$lib/deck/OsTabs.svelte';
 	import { t } from '$lib/i18n.svelte';
-	import { REPO_URL, REPO_DIR } from '$lib/config';
 
-	const bunWindows = 'powershell -c "irm bun.sh/install.ps1 | iex"';
 	const uvWindows =
 		'powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"';
-
-	const cloneAndRun = `git clone ${REPO_URL}
-cd ${REPO_DIR}
-bun install
-bun run dev --open`;
 
 	const zedSettings = `{
   "languages": {
@@ -42,12 +35,13 @@ bun run dev --open`;
 	<Slide kicker={t('Setup', 'Opsætning')} title={t('Set up your tools', 'Sæt dine værktøjer op')}>
 		{#snippet en()}
 			<p>
-				Seven steps. Do them in order, and ask for help if something looks different on your screen.
+				Six steps. Do them in order, and ask for help if something looks different on your screen.
 			</p>
 			<ol>
 				<li>Create a <strong>GitHub</strong> account</li>
-				<li>Install <strong>bun</strong></li>
-				<li>Get <strong>these lessons</strong> onto your own computer</li>
+
+				<li>Install <strong>git</strong> and the <strong>GitHub CLI</strong>, and log in</li>
+
 				<li>Install <strong>Zed</strong></li>
 				<li>Install <strong>uv</strong></li>
 				<li>Install <strong>ruff</strong>, <strong>ty</strong> and <strong>pytest</strong></li>
@@ -60,12 +54,13 @@ bun run dev --open`;
 		{/snippet}
 		{#snippet da()}
 			<p>
-				Syv trin. Tag dem i rækkefølge, og bed om hjælp, hvis noget ser anderledes ud på din skærm.
+				Seks trin. Tag dem i rækkefølge, og bed om hjælp, hvis noget ser anderledes ud på din skærm.
 			</p>
 			<ol>
 				<li>Opret en <strong>GitHub</strong>-konto</li>
-				<li>Installér <strong>bun</strong></li>
-				<li>Få <strong>disse lektioner</strong> over på din egen computer</li>
+
+				<li>Installér <strong>git</strong> og <strong>GitHub CLI</strong>, og log ind</li>
+
 				<li>Installér <strong>Zed</strong></li>
 				<li>Installér <strong>uv</strong></li>
 				<li>Installér <strong>ruff</strong>, <strong>ty</strong> og <strong>pytest</strong></li>
@@ -143,7 +138,7 @@ bun run dev --open`;
 	</Slide>
 
 	<Slide
-		kicker={t('Step 1 of 7', 'Trin 1 af 7')}
+		kicker={t('Step 1 of 6', 'Trin 1 af 6')}
 		title={t('Create a GitHub account', 'Opret en GitHub-konto')}
 	>
 		{#snippet en()}
@@ -196,142 +191,105 @@ bun run dev --open`;
 		{/snippet}
 	</Slide>
 
-	<Slide kicker={t('Step 2 of 7', 'Trin 2 af 7')} title={t('Install bun', 'Installér bun')}>
-		{#snippet en()}
-			<p>
-				bun runs JavaScript programs. This website is one of them, so with bun you can run all the
-				lessons on your own computer, even without internet.
-			</p>
-			<OsTabs>
-				{#snippet linux()}
-					<Code code="curl -fsSL https://bun.com/install | bash" />
-					<p class="text-base">
-						If it complains about <code>unzip</code>, install that first:
-						<code>sudo apt install unzip</code>
-					</p>
-				{/snippet}
-				{#snippet macos()}
-					<Code code="curl -fsSL https://bun.com/install | bash" />
-					<p class="text-base">Or, with Homebrew: <code>brew install oven-sh/bun/bun</code></p>
-				{/snippet}
-				{#snippet windows()}
-					<Code code={bunWindows} />
-				{/snippet}
-			</OsTabs>
-			<p>
-				<strong>Close the terminal and open a new one</strong>, so it learns about bun. Then check
-				that it works:
-			</p>
-			<Code code="bun --version" />
-			<p class="text-base">You should see a version number like <code>1.3.13</code>.</p>
-		{/snippet}
-		{#snippet da()}
-			<p>
-				bun kører JavaScript-programmer. Denne hjemmeside er et af dem, så med bun kan du køre alle
-				lektionerne på din egen computer, også uden internet.
-			</p>
-			<OsTabs>
-				{#snippet linux()}
-					<Code code="curl -fsSL https://bun.com/install | bash" />
-					<p class="text-base">
-						Brokker den sig over <code>unzip</code>, så installér det først:
-						<code>sudo apt install unzip</code>
-					</p>
-				{/snippet}
-				{#snippet macos()}
-					<Code code="curl -fsSL https://bun.com/install | bash" />
-					<p class="text-base">Eller med Homebrew: <code>brew install oven-sh/bun/bun</code></p>
-				{/snippet}
-				{#snippet windows()}
-					<Code code={bunWindows} />
-				{/snippet}
-			</OsTabs>
-			<p>
-				<strong>Luk terminalen og åbn en ny</strong>, så den lærer bun at kende. Tjek så, at det
-				virker:
-			</p>
-			<Code code="bun --version" />
-			<p class="text-base">Du skulle gerne se et versionsnummer som <code>1.3.13</code>.</p>
-		{/snippet}
-	</Slide>
-
 	<Slide
-		kicker={t('Step 3 of 7', 'Trin 3 af 7')}
-		title={t('Get the lessons onto your computer', 'Få lektionerne over på din computer')}
+		kicker={t('Step 2 of 6', 'Trin 2 af 6')}
+		title={t('Install git and the GitHub CLI', 'Installér git og GitHub CLI')}
 	>
 		{#snippet en()}
 			<p>
-				We use <strong>git</strong> to copy code from GitHub. Check whether you already have it:
+				<strong>git</strong> copies code to and from GitHub. The <strong>GitHub CLI</strong> (<code
+					>gh</code
+				>) logs you in, so git never asks for passwords.
 			</p>
-			<Code code="git --version" />
 			<OsTabs>
 				{#snippet linux()}
+					<p>On Ubuntu or Debian:</p>
+					<Code code="sudo apt install git gh" />
 					<p class="text-base">
-						No git? On Ubuntu or Debian: <code>sudo apt install git</code>. On other Linux, ask your
-						instructor.
+						Other Linux? See <a
+							href="https://github.com/cli/cli/blob/trunk/docs/install_linux.md"
+							target="_blank"
+							rel="noreferrer">the gh install guide</a
+						> or ask your instructor.
 					</p>
 				{/snippet}
 				{#snippet macos()}
-					<p class="text-base">
-						No git? Run <code>xcode-select --install</code> and click <strong>Install</strong> in the
-						window that pops up.
+					<p>
+						First git. Run this and click <strong>Install</strong> in the window that pops up (skip it
+						if it says git is already installed):
 					</p>
+					<Code code="xcode-select --install" />
+					<p>Then gh, with Homebrew:</p>
+					<Code code="brew install gh" />
 				{/snippet}
 				{#snippet windows()}
-					<p class="text-base">
-						No git? Run <code>winget install --id Git.Git -e</code>, then open a new PowerShell.
-					</p>
+					<Code code={`winget install --id Git.Git -e\nwinget install --id GitHub.cli -e`} />
+					<p class="text-base">Then close PowerShell and open a new one.</p>
 				{/snippet}
 			</OsTabs>
-			<p>
-				Go to the folder where you keep your stuff, for example <code>cd ~/Documents</code>. Then
-				copy the lessons and start them:
-			</p>
-			<Code code={cloneAndRun} />
-			<p>Your browser opens with these very slides, running from your own computer. 🎉</p>
-			<p class="tip">
-				Next time you only need the last command: <code>cd {REPO_DIR}</code> and
-				<code>bun run dev --open</code>. Stop it with <kbd>Ctrl</kbd> + <kbd>C</kbd>.
-			</p>
+			<p>Now log in. Answer the questions like this:</p>
+			<Code code="gh auth login" />
+			<ol class="text-base">
+				<li><strong>Where do you use GitHub?</strong> GitHub.com</li>
+				<li><strong>Preferred protocol?</strong> HTTPS</li>
+				<li><strong>Authenticate Git with your GitHub credentials?</strong> Yes</li>
+				<li><strong>How would you like to authenticate?</strong> Login with a web browser</li>
+				<li>
+					Copy the code it shows, press <kbd>Enter</kbd>, paste the code in the browser and click
+					<strong>Authorize</strong>.
+				</li>
+			</ol>
+			<p><strong>Check:</strong> <code>gh auth status</code> should say you are logged in.</p>
 		{/snippet}
 		{#snippet da()}
 			<p>
-				Vi bruger <strong>git</strong> til at kopiere kode fra GitHub. Tjek, om du allerede har det:
+				<strong>git</strong> kopierer kode til og fra GitHub. <strong>GitHub CLI</strong> (<code
+					>gh</code
+				>) logger dig ind, så git aldrig spørger om kodeord.
 			</p>
-			<Code code="git --version" />
 			<OsTabs>
 				{#snippet linux()}
+					<p>På Ubuntu eller Debian:</p>
+					<Code code="sudo apt install git gh" />
 					<p class="text-base">
-						Ingen git? På Ubuntu eller Debian: <code>sudo apt install git</code>. På andre
-						Linux-systemer, spørg din underviser.
+						Andet Linux? Se <a
+							href="https://github.com/cli/cli/blob/trunk/docs/install_linux.md"
+							target="_blank"
+							rel="noreferrer">gh's installationsguide</a
+						> eller spørg din underviser.
 					</p>
 				{/snippet}
 				{#snippet macos()}
-					<p class="text-base">
-						Ingen git? Kør <code>xcode-select --install</code> og klik på <strong>Installér</strong> i
-						det vindue, der dukker op.
+					<p>
+						Først git. Kør dette og klik på <strong>Installér</strong> i det vindue, der dukker op (spring
+						over, hvis den siger, at git allerede er installeret):
 					</p>
+					<Code code="xcode-select --install" />
+					<p>Så gh, med Homebrew:</p>
+					<Code code="brew install gh" />
 				{/snippet}
 				{#snippet windows()}
-					<p class="text-base">
-						Ingen git? Kør <code>winget install --id Git.Git -e</code>, og åbn så en ny PowerShell.
-					</p>
+					<Code code={`winget install --id Git.Git -e\nwinget install --id GitHub.cli -e`} />
+					<p class="text-base">Luk så PowerShell og åbn en ny.</p>
 				{/snippet}
 			</OsTabs>
-			<p>
-				Gå til den mappe, hvor du har dine ting, for eksempel <code>cd ~/Documents</code>. Kopiér så
-				lektionerne og start dem:
-			</p>
-			<Code code={cloneAndRun} />
-			<p>Din browser åbner med præcis de her slides, kørende fra din egen computer. 🎉</p>
-			<p class="tip">
-				Næste gang skal du kun bruge den sidste kommando: <code>cd {REPO_DIR}</code> og
-				<code>bun run dev --open</code>. Stop den med <kbd>Ctrl</kbd> + <kbd>C</kbd>.
-			</p>
+			<p>Log nu ind. Svar sådan her på spørgsmålene:</p>
+			<Code code="gh auth login" />
+			<ol class="text-base">
+				<li><strong>Where do you use GitHub?</strong> GitHub.com</li>
+				<li><strong>Preferred protocol?</strong> HTTPS</li>
+				<li><strong>Authenticate Git with your GitHub credentials?</strong> Yes</li>
+				<li><strong>How would you like to authenticate?</strong> Login with a web browser</li>
+				<li>
+					Kopiér den kode, den viser, tryk <kbd>Enter</kbd>, sæt koden ind i browseren og klik på
+					<strong>Authorize</strong>.
+				</li>
+			</ol>
+			<p><strong>Tjek:</strong> <code>gh auth status</code> skal sige, at du er logget ind.</p>
 		{/snippet}
 	</Slide>
 
-	<Slide kicker={t('Step 4 of 7', 'Trin 4 af 7')} title={t('Install Zed', 'Installér Zed')}>
+	<Slide kicker={t('Step 3 of 6', 'Trin 3 af 6')} title={t('Install Zed', 'Installér Zed')}>
 		{#snippet en()}
 			<p>
 				Zed is the editor where we write code. It is fast, and it understands Python, JavaScript and
@@ -404,7 +362,7 @@ bun run dev --open`;
 		{/snippet}
 	</Slide>
 
-	<Slide kicker={t('Step 5 of 7', 'Trin 5 af 7')} title={t('Install uv', 'Installér uv')}>
+	<Slide kicker={t('Step 4 of 6', 'Trin 4 af 6')} title={t('Install uv', 'Installér uv')}>
 		{#snippet en()}
 			<p>
 				uv installs Python for you, creates projects, and keeps track of the packages each project
@@ -462,7 +420,7 @@ bun run dev --open`;
 	</Slide>
 
 	<Slide
-		kicker={t('Step 6 of 7', 'Trin 6 af 7')}
+		kicker={t('Step 5 of 6', 'Trin 5 af 6')}
 		title={t('Install ruff, ty and pytest', 'Installér ruff, ty og pytest')}
 	>
 		{#snippet en()}
@@ -524,7 +482,7 @@ bun run dev --open`;
 	</Slide>
 
 	<Slide
-		kicker={t('Step 7 of 7', 'Trin 7 af 7')}
+		kicker={t('Step 6 of 6', 'Trin 6 af 6')}
 		title={t('Tell Zed to use ruff and ty', 'Fortæl Zed, at den skal bruge ruff og ty')}
 	>
 		{#snippet en()}
@@ -578,24 +536,24 @@ bun run dev --open`;
 		title={t("All done? Let's check", 'Færdig? Lad os tjekke')}
 	>
 		{#snippet en()}
-			<p>Run these in a new terminal. Each one should print a version number:</p>
-			<Code code={`git --version\nbun --version\nuv --version\nruff --version\nty --version`} />
 			<p>
-				Then open Zed and make sure it starts, and make sure <code>bun run dev --open</code> inside
-				the <code>{REPO_DIR}</code> folder shows these slides.
+				Run these in a new terminal. Each one should print a version number, and gh should say you
+				are logged in:
 			</p>
+			<Code code={`git --version\ngh auth status\nuv --version\nruff --version\nty --version`} />
+			<p>Then open Zed and make sure it starts.</p>
 			<p>If everything works, you are ready to create your first project. 🏴‍☠️</p>
 			<p class="tip">
 				Something not working? That is normal. Raise your hand and we will fix it together.
 			</p>
 		{/snippet}
 		{#snippet da()}
-			<p>Kør disse i en ny terminal. Hver af dem skal skrive et versionsnummer:</p>
-			<Code code={`git --version\nbun --version\nuv --version\nruff --version\nty --version`} />
 			<p>
-				Åbn så Zed og se, at den starter, og tjek, at <code>bun run dev --open</code> inde i mappen
-				<code>{REPO_DIR}</code> viser de her slides.
+				Kør disse i en ny terminal. Hver af dem skal skrive et versionsnummer, og gh skal sige, at
+				du er logget ind:
 			</p>
+			<Code code={`git --version\ngh auth status\nuv --version\nruff --version\nty --version`} />
+			<p>Åbn så Zed og se, at den starter.</p>
 			<p>Virker det hele, er du klar til at lave dit første projekt. 🏴‍☠️</p>
 			<p class="tip">
 				Er der noget, der ikke virker? Det er helt normalt. Ræk hånden op, så ordner vi det sammen.

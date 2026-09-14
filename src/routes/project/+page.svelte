@@ -93,7 +93,12 @@ pythonpath = ["."]`;
 				{#snippet windows()}<Code code="cd ~\Documents" />{/snippet}
 			</OsTabs>
 			<p>Then let uv create the project and step into it:</p>
-			<Code code={`uv init learn-python\ncd learn-python`} />
+			<Code code={`uv init --no-package learn-python\ncd learn-python`} />
+			<p class="text-base">
+				<code>--no-package</code> keeps things simple: your code lives right in the folder, in
+				<code>main.py</code>. Without it, uv puts the code in a <code>src/</code> folder instead, which
+				you will meet in the last lesson.
+			</p>
 			<p>uv made a folder with these files:</p>
 			<Code code={L(tree)} />
 		{/snippet}
@@ -105,7 +110,12 @@ pythonpath = ["."]`;
 				{#snippet windows()}<Code code="cd ~\Documents" />{/snippet}
 			</OsTabs>
 			<p>Lad så uv lave projektet, og gå ind i det:</p>
-			<Code code={`uv init learn-python\ncd learn-python`} />
+			<Code code={`uv init --no-package learn-python\ncd learn-python`} />
+			<p class="text-base">
+				<code>--no-package</code> holder det simpelt: din kode ligger direkte i mappen, i
+				<code>main.py</code>. Uden det lægger uv koden i en <code>src/</code>-mappe i stedet, og den
+				møder du i den sidste lektion.
+			</p>
 			<p>uv har lavet en mappe med disse filer:</p>
 			<Code code={L(tree)} />
 		{/snippet}
@@ -286,38 +296,41 @@ pythonpath = ["."]`;
 			<p>uv already prepared git for you. Save a snapshot of your project:</p>
 			<Code code={`git add .\ngit commit -m "My first project"`} />
 			<p>
-				On <a href="https://github.com/new" target="_blank" rel="noreferrer">github.com/new</a>,
-				create a repository called <strong>learn-python</strong>. Leave all the checkboxes empty.
-				GitHub then shows you two commands like these:
+				You logged in with the GitHub CLI during setup, so one command creates the repository on
+				GitHub and uploads your code:
 			</p>
-			<Code
-				code={`git remote add origin https://github.com/YOUR-USERNAME/learn-python.git\ngit push -u origin main`}
-			/>
-			<p class="text-base">
-				Git may ask you to log in to GitHub in your browser the first time. If git is missing on
-				your computer, ask your instructor: on macOS run <code>xcode-select --install</code>, on
-				Windows <code>winget install Git.Git</code>.
+			<Code code="gh repo create learn-python --source=. --public --push" />
+			<p>Then open it in the browser:</p>
+			<Code code="gh repo view --web" />
+			<p>
+				Your code is online! 🎉 Next time you change something, it is just <code>git add .</code>,
+				<code>git commit -m "what I did"</code>
+				and <code>git push</code>.
 			</p>
-			<p>Refresh the GitHub page. Your code is online! 🎉</p>
+			<p class="tip">
+				If <code>gh</code> says you are not logged in, run <code>gh auth login</code> again like in the
+				setup.
+			</p>
 		{/snippet}
 		{#snippet da()}
 			<p>uv har allerede gjort git klar for dig. Gem et øjebliksbillede af dit projekt:</p>
 			<Code code={`git add .\ngit commit -m "Mit første projekt"`} />
 			<p>
-				Lav et repository på <a href="https://github.com/new" target="_blank" rel="noreferrer"
-					>github.com/new</a
-				>, der hedder <strong>learn-python</strong>. Lad alle afkrydsningsfelter være tomme. GitHub
-				viser dig så to kommandoer i stil med disse:
+				Du loggede ind med GitHub CLI under opsætningen, så én kommando laver repositoriet på GitHub
+				og lægger din kode op:
 			</p>
-			<Code
-				code={`git remote add origin https://github.com/DIT-BRUGERNAVN/learn-python.git\ngit push -u origin main`}
-			/>
-			<p class="text-base">
-				Git beder dig måske om at logge ind på GitHub i browseren første gang. Mangler git på din
-				computer, så spørg din underviser: på macOS kør <code>xcode-select --install</code>, på
-				Windows <code>winget install Git.Git</code>.
+			<Code code="gh repo create learn-python --source=. --public --push" />
+			<p>Åbn det så i browseren:</p>
+			<Code code="gh repo view --web" />
+			<p>
+				Din kode er online! 🎉 Næste gang du ændrer noget, er det bare <code>git add .</code>,
+				<code>git commit -m "hvad jeg gjorde"</code>
+				og <code>git push</code>.
 			</p>
-			<p>Genindlæs GitHub-siden. Din kode er online! 🎉</p>
+			<p class="tip">
+				Siger <code>gh</code>, at du ikke er logget ind, så kør <code>gh auth login</code> igen ligesom
+				i opsætningen.
+			</p>
 		{/snippet}
 	</Slide>
 </Deck>

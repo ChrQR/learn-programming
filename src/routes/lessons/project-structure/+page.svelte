@@ -180,6 +180,11 @@ def test_del_skat():
 					<code>test_</code>.
 				</li>
 			</ul>
+			<p class="tip">
+				Bigger projects and libraries put the packages in a <code>src/</code> folder:
+				<code>src/learn_python/</code>. That is what <code>uv init</code> does when you leave out
+				<code>--no-package</code>. Same idea, one folder deeper.
+			</p>
 		{/snippet}
 		{#snippet da()}
 			<p>
@@ -198,6 +203,11 @@ def test_del_skat():
 					<code>test_</code>.
 				</li>
 			</ul>
+			<p class="tip">
+				Større projekter og biblioteker lægger pakkerne i en <code>src/</code>-mappe:
+				<code>src/learn_python/</code>. Det er det, <code>uv init</code> gør, når du udelader
+				<code>--no-package</code>. Samme idé, bare én mappe dybere.
+			</p>
 		{/snippet}
 	</Slide>
 
