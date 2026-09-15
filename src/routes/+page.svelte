@@ -66,10 +66,7 @@
 		{/snippet}
 		{#snippet da()}
 			<ul>
-				<li>
-					Et kursus for <strong>11 til 14-årige</strong>, der vil lære at få computere til at gøre,
-					som de siger.
-				</li>
+				<li>Et kursus for alle, der vil lære at få computere til at gøre, som de siger.</li>
 				<li>
 					Vi starter med <strong>Python</strong>: et venligt sprog, som også bruges af rigtige
 					virksomheder, forskere og spiludviklere.
